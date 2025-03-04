@@ -1,4 +1,4 @@
-﻿using BuidingBlocks.CQRS;
+﻿using BuildingBlocks.CQRS;
 using MediatR;
 
 namespace BuildingBlocks.CQRS;
