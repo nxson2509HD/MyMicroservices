@@ -1,6 +1,9 @@
 ﻿
 using BuildingBlocks.Behaviors;
 using BuildingBlocks.Exceptions.Handler;
+using Catalog.API.Data;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,11 +22,23 @@ builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddMarten(
     opt => opt.Connection(builder.Configuration.GetConnectionString("Database")!)
 ).UseLightweightSessions();
-var app = builder.Build();
+
+if (builder.Environment.IsDevelopment())
+    builder.Services.InitializeMartenWith<CatalogInitialData>();
 // logic to handle exception in DI (IServiceCollection)
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
+builder.Services.AddHealthChecks().AddNpgSql(builder.Configuration.GetConnectionString("Database")!);
+
+var app = builder.Build();
+
 // Kích hoạt Carter để xử lý các module
 app.MapCarter();
+
+app.UseHealthChecks("/health", new HealthCheckOptions {
+
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 // This exception handling middleware
 app.UseExceptionHandler(options => { });
 app.Run();
