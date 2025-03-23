@@ -1,5 +1,7 @@
+//using Discount.Grpc;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+//using BuildingBlocks.Messaging.MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,14 +25,13 @@ builder.Services.AddMarten(opts =>
 }).UseLightweightSessions();
 
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
-//extend implement IBasket
 builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();
 
-//builder.Services.AddStackExchangeRedisCache(options =>
-//{
-//    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-//    //options.InstanceName = "Basket";
-//});
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "Basket";
+});
 
 //Grpc Services
 //builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(options =>
